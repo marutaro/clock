@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>clock</title>   
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>   
+		<script>
+			$(function() {
+				set_hours();
+				set_mins();
+				set_sec();
+
+				setInterval( function() {
+					set_hours();
+				}, 1000 );
+			
+				setInterval( function() {
+					set_mins();
+				}, 1000 );
+			
+				setInterval( function() {
+					set_sec();
+				}, 1000 );
+			});
+				
+			function set_hours() {
+				var hours = new Date().getHours();
+				var mins = new Date().getMinutes();
+				var hourDegree = hours * 30 + (mins / 2);
+				var hourRotate = "rotate(" + hourDegree + "deg)";
+				$("#js-hour").css({"transform" : hourRotate});  
+			}
+			
+			function set_mins() {
+				var mins = new Date().getMinutes();
+				var minDegree = mins * 6;
+				var minRotate = "rotate(" + minDegree + "deg)";
+				$("#js-min").css({"transform" : minRotate});				
+			}
+			
+			function set_sec() {
+				var seconds = new Date().getSeconds();
+				var secondDegree = seconds * 6;
+				var secondRotate = "rotate(" + secondDegree + "deg)";
+				$("#js-sec").css({"transform" : secondRotate});
+			}
+		</script>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			.clock {
+				background: url(images/clock.png);
+				position: relative;
+				margin: 20px auto 0 auto;
+				list-style: none;
+				width: 600px;
+				height: 600px;
+			}
+			
+			.hour {
+				background: url(images/hourhand.png);
+				z-index: 1;
+			}
+			
+			.min {
+				background: url(images/minhand.png);
+				z-index: 2;
+			}
+			
+			.sec {
+				background: url(images/sechand.png);
+				z-index: 3;
+			}
+			
+			.hour, .min, .sec {
+				width: 30px;
+				height: 600px;
+				position: absolute;
+				top: 0px;
+				left: 285px;
+			}
+			
+			p {
+				text-align: center; 
+				padding: 10px 0 0 0;
+			}
+/*ストップウォッチ追記style*/
+			body{
+				background: #e0e0e0;
+				font-family: Arial, sans-serif;
+				text-align: center;
+			}
+
+			#timerText{
+				color: #00aaff;
+				font-size: 128px;
+				margin: 40px auto;
+				text-shadow: 0 5px 0 rgba(0, 0, 0, 0.5);
+			}
+
+			.btn{
+				display: inline-block;
+				width: 100px;
+				padding: 7px;
+				border-radius: 5px;
+				box-shadow: 0 4px 0 #2f4f4f;
+				color: #fff;
+				background: #00aaff;
+				cursor: pointer;
+			}
+			.btn + .btn{
+				margin-left: 10px;
+			}
+			.btn.active{
+				opacity: 1.0;
+			}
+			.btn.inactive{
+				opacity: 0.5;
+			}
+		</style>
+	</head>
+	<body>
+		<ul class="clock">	
+			<li class="hour" id="js-hour"></li>		
+			<li class="min" id="js-min"></li>
+			<li class="sec" id="js-sec"></li>
+		</ul>
+
+	<div id ="timerText">0.00</div>
+			<div id ="start" class="btn active">START</div>
+			<div id ="stop" class="btn active">STOP</div>
+			<div id ="reset" class="btn active">RESET</div>	
+		<script>
+			/*ストップウォッチ追記*/
+			(function(){
+				'use strict';
+				var startTime;
+				var timerId;
+				
+				var elapsedTime = 0;
+				var isRunning = false;
+				
+				var startButton = document.getElementById('start');
+				var stopButton  = document.getElementById('stop');
+				var resetButton = document.getElementById('reset');
+				var timerText   = document.getElementById('timerText');
+
+				function setButtonState(start,stop,reset){
+					startButton.className = start? 'btn active':'btn inactive';
+					stopButton.className  = stop?  'btn active':'btn inactive';
+					resetButton.className = reset? 'btn active':'btn inactive';
+				}
+				
+				setButtonState(true, false, false);
+
+				startButton.addEventListener ('click' ,function () {
+					
+					if(isRunning) return;
+					isRunning = true;
+					
+					startTime = Date.now();//1970/1/1 00:00:00からの経過ミリ秒
+					updateTimerText();
+					setButtonState(false, true, false);
+				});
+				
+				stopButton.addEventListener('click',function(){
+					if(!isRunning) return;
+					isRunning = false;
+					elapsedTime += Date.now() - startTime;
+					clearTimeout(timerId);
+					setButtonState(true, false, true);
+				});
+
+				resetButton.addEventListener('click',function(){
+					if(isRunning) return;
+					timerText.innerHTML = '0.00';
+					elapsedTime = 0;
+					setButtonState(true, false, false);
+				});
+
+				function updateTimerText() {
+					timerId = setTimeout(function(){
+						var t = Date.now() - startTime + elapsedTime;
+						timerText.innerHTML = ( t / 1000).toFixed(2);
+						updateTimerText();
+					}, 10);
+				}
+
+			})();
+		</script>
+	</body>
+</html>
